@@ -49,13 +49,8 @@ jobs:
           tar -xzf vscodium-download/*.tar.gz -C public --strip-components=1
 
           echo "Moving server resources to root..."
-          # Copy resources/server/* files to public/ root
-          # We use -r (recursive) and -f (force) to overwrite existing files if necessary
-          cp -rf public/resources/server/* public/
-
           echo "Cleaning up..."
-          # Remove bin/ and resources/ folders
-          rm -rf public/bin
+          # Remove bin/ folder
           rm -rf public/resources
           
           # Remove download artifact

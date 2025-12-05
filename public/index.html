@@ -1,63 +1,77 @@
+<!-- Copyright (C) Microsoft Corporation. All rights reserved. -->
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./out/vs/workbench/workbench.web.main.css" />
-</head>
-<body style="margin:0;overflow:hidden;">
-    <script src="./out/vs/loader.js"></script>
-    <script>
-        require.config({baseUrl: `${window.location.origin}/out`});
-    </script>
-    <script src="./out/nls.messages.js"></script>
-    <script src="./out/vs/workbench/workbench.web.main.js"></script>
-    <script>
-    require(['vs/workbench/workbench.web.main'], function (wb) {
-        const config = {
-            // Configuration essentielle pour définir l'identité du produit
-            productConfiguration: {
-                nameShort: "VS Code Dev",
-                nameLong: "VS Code Dev",
-                applicationName: "code-oss",
-                dataFolderName: ".vscode-oss",
-                version: "1.90.0", // Mettez une version approximative
-                extensionsGallery: {
-                    serviceUrl: "https://open-vsx.org/vscode/gallery",
-                    itemUrl: "https://open-vsx.org/vscode/item",
-                    resourceUrlTemplate: "https://open-vsx.org/vscode/unknow",
-                    controlUrl: "",
-                    recommendationsUrl: ""
-                }
-            },
-            configurationDefaults: {
-                "workbench.secondarySideBar.defaultVisibility": "hidden",
-                "workbench.statusBar.visible": false,
-                "workbench.layoutControl.enabled": false,
-                "window.commandCenter": false,
-                "workbench.startupEditor": "none",
-                "workbench.tips.enabled": false,
-                "workbench.welcomePage.walkthroughs.openOnInstall": false,
-            },
-            developmentOptions: {
-                logLevel: 0
-            },
-            // Important : définit le dossier racine pour le FileSystem virtuel
-            folderUri: { scheme: "memfs", path: "/sample-project" },
-        };
+<html>
+	<head>
+		<script>
+			performance.mark('code/didStartRenderer');
+		</script>
+		<meta charset="utf-8" />
 
-        wb.create(window.document.body, {
-            ...config,
-            workspaceProvider: {
-                trusted: true,
-                workspace: { folderUri: wb.URI.revive(config.folderUri) },
-                async open(workspace, options) {
-                    console.log("openFolder requested", workspace);
-                    return true;
-                }
-            }
-        });
-    });
+		<!-- Mobile tweaks -->
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-title" content="Code">
+		<link rel="apple-touch-icon" href="./resources/server/code-192.png" />
+
+		<!-- Disable pinch zooming -->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+
+		<!-- Workbench Icon/Manifest/CSS -->
+		<link rel="icon" href="./resources/server/favicon.ico" type="image/x-icon" />
+		<link rel="manifest" href="./resources/server/manifest.json" crossorigin="use-credentials" />
+		<link rel="stylesheet" href="./out/vs/code/browser/workbench/workbench.css">
+
+	</head>
+
+	<body aria-label="">
+	</body>
+
+	<!-- Configuration Script -->
+<script>
+    // 1. Définition de la racine (puisque nous sommes à la racine du site)
+    const baseUrl = '.'; 
+    
+    // Définir la racine pour VSCode
+    globalThis._VSCODE_FILE_ROOT = baseUrl + '/out/';
+
+    // 2. Configuration du Workbench (Crucial pour le mode statique)
+    const webConfiguration = {
+        // Dossier ouvert par défaut (Virtuel car pas de backend)
+        folderUri: { scheme: 'memfs', path: '/code' },
+        productConfiguration: {
+            nameShort: "VSCodium",
+            nameLong: "VSCodium Web"
+        }
+    };
+
+    // 3. Injection de la configuration dans les Meta Tags (comme le fait le serveur original)
+    
+    // Création meta config
+    const metaConfig = document.createElement('meta');
+    metaConfig.id = 'vscode-workbench-web-configuration';
+    metaConfig.setAttribute('data-settings', JSON.stringify(webConfiguration));
+    document.head.appendChild(metaConfig);
+
+    // Création meta auth (vide pour le statique)
+    const metaAuth = document.createElement('meta');
+    metaAuth.id = 'vscode-workbench-auth-session';
+    metaAuth.setAttribute('data-settings', '');
+    document.head.appendChild(metaAuth);
+
+    // Marqueur de performance
+    performance.mark('code/didStartRenderer');
 </script>
-</body>
+
+<!-- Startup Scripts -->
+<script>
+    performance.mark('code/willLoadWorkbenchMain');
+</script>
+
+<!-- Chargement des fichiers de langue (NLS) -->
+<!-- On pointe vers le fichier standard généré dans out/ -->
+<script type="module" src="./out/nls.messages.js"></script>
+
+<!-- Lancement du Workbench -->
+<script type="module" src="./out/vs/code/browser/workbench/workbench.js"></script>
+
 </html>
