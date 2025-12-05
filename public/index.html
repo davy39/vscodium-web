@@ -2,7 +2,15 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <!-- Ce script active les fonctionnalités de sécurité nécessaires pour Node.js/Streams -->
+        <!-- CONFIGURATION COI (A METTRE EN TOUT PREMIER) -->
+    <script>
+        window.coi = {
+            shouldRegister: () => true,
+            shouldDeregister: () => false,
+            doReload: () => true,
+            quiet: false // Affiche les logs dans la console pour debugger
+        };
+    </script>
     <script src="./coi-serviceworker.min.js"></script>
     <title>VSCodium Web</title>
     <meta name="mobile-web-app-capable" content="yes" />
