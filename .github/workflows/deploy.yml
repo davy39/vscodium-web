@@ -1,12 +1,9 @@
 name: Deploy VSCodium Web
 
 on:
-  # Allows you to run this manually from the Actions tab
   workflow_dispatch:
-  # Checks for updates every day at midnight. 
-  # (GitHub Actions cannot subscribe directly to external repo events, so we poll).
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *' # Tous les jours à minuit
 
 permissions:
   contents: read
@@ -24,41 +21,53 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Download Latest VSCodium Alpine Web Release
+      # --- 1. VSCodium Core ---
+      - name: Download & Unpack VSCodium
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Fetching latest release info..."
-          # Use GitHub CLI to download the specific asset from VSCodium repo
+          # Téléchargement VSCodium
           gh release download \
             --repo VSCodium/vscodium \
             --pattern "*vscodium-reh-web-alpine-x64*.tar.gz" \
             --dir vscodium-download \
             --clobber
-          
-          echo "Download complete."
 
-      - name: Process Files
-        run: |
-          # Ensure public folder exists (should exist from checkout, but just in case)
+          # Préparation dossier public
           mkdir -p public
-
-          echo "Extracting tarball..."
-          # Extract tarball into public. 
-          # --strip-components=1 removes the top-level folder inside the tar (usually vscodium-reh-web-...)
-          tar -xzf vscodium-download/*.tar.gz -C public --strip-components=1
-
-          echo "Moving server resources to root..."
-          echo "Cleaning up..."
-          # Remove bin/ folder
-          rm -rf public/resources
           
-          # Remove download artifact
-          rm -rf vscodium-download
+          # Extraction
+          tar -xzf vscodium-download/*.tar.gz -C public --strip-components=1
+                    
+          # Nettoyage VSCodium
+          rm -rf public/bin vscodium-download
 
-          echo "File processing complete. Listing public dir:"
-          ls -la public/
+      # --- 2. Extension Start WebContainer ---
+      - name: Download & Unpack Extension
+        run: |
+          # Création du dossier pour l'extension
+          mkdir -p public/extensions/start-webcontainer
 
+          echo "Downloading extension from Marketplace..."
+          # URL directe pour télécharger la dernière version du VSIX
+          # Note: On télécharge le fichier en tant que .zip pour faciliter l'extraction
+          curl -L -o extension.zip "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/hankei6km/vsextensions/vscode-ext-start-webcontainer/latest/vspackage"
+
+          echo "Unzipping extension..."
+          # Extraction dans un dossier temporaire
+          unzip -q extension.zip -d ext_temp
+          
+          # Le code de l'extension se trouve TOUJOURS dans un sous-dossier nommé 'extension' dans le VSIX
+          # On déplace le contenu de ce sous-dossier vers notre dossier public final
+          cp -r ext_temp/extension/* public/extensions/start-webcontainer/
+          
+          # Nettoyage
+          rm extension.zip
+          rm -rf ext_temp
+          
+          echo "Extension installed in public/extensions/start-webcontainer"
+
+      # --- 3. Déploiement ---
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

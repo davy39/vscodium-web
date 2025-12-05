@@ -50,7 +50,16 @@
             }
         },
         // Configuration additionnelle pour aider à trouver les assets
-        additionalBuiltinExtensions: []
+        additionalBuiltinExtensions: [
+            {
+                // Scheme: http ou https selon l'endroit où vous êtes
+                scheme: url.protocol.replace(':', ''), 
+                // Authority: le domaine (ex: davy39.github.io)
+                authority: url.host, 
+                // Path: le chemin vers le dossier extrait par l'action GitHub
+                path: path + 'extensions/start-webcontainer'
+            }
+        ]
     };
 
     // Injection de la config dans les Meta Tags
