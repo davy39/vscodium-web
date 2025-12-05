@@ -1,0 +1,77 @@
+name: Deploy VSCodium Web
+
+on:
+  # Allows you to run this manually from the Actions tab
+  workflow_dispatch:
+  # Checks for updates every day at midnight. 
+  # (GitHub Actions cannot subscribe directly to external repo events, so we poll).
+  schedule:
+    - cron: '0 0 * * *'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Latest VSCodium Alpine Web Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching latest release info..."
+          # Use GitHub CLI to download the specific asset from VSCodium repo
+          gh release download \
+            --repo VSCodium/vscodium \
+            --pattern "*vscodium-reh-web-alpine-x64*.tar.gz" \
+            --dir vscodium-download \
+            --clobber
+          
+          echo "Download complete."
+
+      - name: Process Files
+        run: |
+          # Ensure public folder exists (should exist from checkout, but just in case)
+          mkdir -p public
+
+          echo "Extracting tarball..."
+          # Extract tarball into public. 
+          # --strip-components=1 removes the top-level folder inside the tar (usually vscodium-reh-web-...)
+          tar -xzf vscodium-download/*.tar.gz -C public --strip-components=1
+
+          echo "Moving server resources to root..."
+          # Copy resources/server/* files to public/ root
+          # We use -r (recursive) and -f (force) to overwrite existing files if necessary
+          cp -rf public/resources/server/* public/
+
+          echo "Cleaning up..."
+          # Remove bin/ and resources/ folders
+          rm -rf public/bin
+          rm -rf public/resources
+          
+          # Remove download artifact
+          rm -rf vscodium-download
+
+          echo "File processing complete. Listing public dir:"
+          ls -la public/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './public'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/out/vs/workbench/workbench.web.main.css" />
+</head>
+<body style="margin:0;overflow:hidden;">
+    <script src="/out/vs/loader.js"></script>
+    <script>
+        require.config({baseUrl: `${window.location.origin}/out`});
+    </script>
+    <script src="/out/nls.messages.js"></script>
+    <script src="/out/vs/workbench/workbench.web.main.js"></script>
+    <script>
+    require(['vs/workbench/workbench.web.main'], function (wb) {
+        const config = {
+            // Configuration essentielle pour définir l'identité du produit
+            productConfiguration: {
+                nameShort: "VS Code Dev",
+                nameLong: "VS Code Dev",
+                applicationName: "code-oss",
+                dataFolderName: ".vscode-oss",
+                version: "1.90.0", // Mettez une version approximative
+                extensionsGallery: {
+                    serviceUrl: "https://open-vsx.org/vscode/gallery",
+                    itemUrl: "https://open-vsx.org/vscode/item",
+                    resourceUrlTemplate: "https://open-vsx.org/vscode/unknow",
+                    controlUrl: "",
+                    recommendationsUrl: ""
+                }
+            },
+            configurationDefaults: {
+                "workbench.secondarySideBar.defaultVisibility": "hidden",
+                "workbench.statusBar.visible": false,
+                "workbench.layoutControl.enabled": false,
+                "window.commandCenter": false,
+                "workbench.startupEditor": "none",
+                "workbench.tips.enabled": false,
+                "workbench.welcomePage.walkthroughs.openOnInstall": false,
+            },
+            developmentOptions: {
+                logLevel: 0
+            },
+            // Important : définit le dossier racine pour le FileSystem virtuel
+            folderUri: { scheme: "memfs", path: "/sample-project" },
+        };
+
+        wb.create(window.document.body, {
+            ...config,
+            workspaceProvider: {
+                trusted: true,
+                workspace: { folderUri: wb.URI.revive(config.folderUri) },
+                async open(workspace, options) {
+                    console.log("openFolder requested", workspace);
+                    return true;
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>
