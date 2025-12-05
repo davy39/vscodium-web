@@ -60,7 +60,7 @@ jobs:
           # Le code de l'extension se trouve TOUJOURS dans un sous-dossier nommé 'extension' dans le VSIX
           # On déplace le contenu de ce sous-dossier vers notre dossier public final
           cp -r ext_temp/extension/* public/extensions/start-webcontainer/
-          
+          echo "{}" > public/extensions/start-webcontainer/package.nls.json
           # Nettoyage
           rm extension.zip
           rm -rf ext_temp
