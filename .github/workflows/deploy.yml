@@ -51,7 +51,7 @@ jobs:
           echo "Downloading extension from Marketplace..."
           # URL directe pour télécharger la dernière version du VSIX
           # Note: On télécharge le fichier en tant que .zip pour faciliter l'extraction
-          curl -L -o extension.zip "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/hankei6km/vsextensions/vscode-ext-start-webcontainer/latest/vspackage"
+          curl -L "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/hankei6km/vsextensions/vscode-ext-start-webcontainer/latest/vspackage" | gunzip > extension.zip
 
           echo "Unzipping extension..."
           # Extraction dans un dossier temporaire
