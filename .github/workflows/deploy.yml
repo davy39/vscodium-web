@@ -67,6 +67,8 @@ jobs:
           # This fixes the "ESM modules are not supported" error.
           # We use grep to exclude the line containing "type": "module"
           sed -i '/"type": "module",/d' public/extensions/start-webcontainer/package.json
+          curl -L -o public/coi-serviceworker.min.js "https://cdn.jsdelivr.net/npm/coi-serviceworker@0.1.7/coi-serviceworker.min.js"
+
           # Nettoyage
           rm extension.zip
           rm -rf ext_temp
